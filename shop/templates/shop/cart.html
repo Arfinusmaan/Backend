@@ -39,14 +39,18 @@
                         </td>
                     </tr>
                     {% endfor %}
+                    
                     <tr>
                         <td colspan="4" class="text-center" style="font-weight: bolder;">
                             Total Price :
                         </td>
                         <td id="net">0</td>
                     </tr>
-                </table>
 
+                </table>
+                <div class="mt-5 ">
+                <a href="{% url 'checkout' %}" class="btn btn-outline-success float-end" > Checkout </a>
+                </div>
             </div>
         </div>
     </section>

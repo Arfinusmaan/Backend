@@ -8,4 +8,9 @@ class Category_Admin(admin.ModelAdmin):
 
 admin.site.register(Category,Category_Admin)
 admin.site.register(Product)
+admin.site.register(Cart)
+admin.site.register(Favourite)
+admin.site.register(Order)
+admin.site.register(OrderItem)
+
 

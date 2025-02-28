@@ -3,8 +3,11 @@ from django.contrib import messages
 from .models import *
 from .forms import CustomUserForm
 from django.contrib.auth import authenticate, login, logout
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 import json
+from django.contrib.auth.decorators import login_required
+
+import random
 
 
 # Create your views here.
@@ -98,8 +101,8 @@ def cart_page(request):
     else:
         return redirect('/')
     
-def remove_cart(request,fid):
-    cartitem=Cart.objects.get(id=fid)
+def remove_cart(request,cid):
+    cartitem=Cart.objects.get(id=cid)
     cartitem.delete()
     return redirect('/cart')
 
@@ -133,3 +136,92 @@ def remove_fav(request,fid):
     fav_item=Favourite.objects.get(id=fid)
     fav_item.delete()
     return redirect('/fav')
+
+@login_required(login_url='login_page')
+def checkout_page(request):
+    cart=Cart.objects.filter(user=request.user)
+    for item in cart:
+        if item.product_qty > item.product.quantity:
+            Cart.objects.delete(id=item.id)
+    cartitems = Cart.objects.filter(user=request.user)
+    total_price = 0
+    for item in cartitems:
+        total_price= total_price+item.product.selling_price*item.product_qty
+
+    context = {'cartitems':cartitems, 'total_price':total_price }
+    return render(request, 'shop/checkout.html', context)
+
+@login_required(login_url='login_page')
+def placeorder(request):
+    if request.method == 'POST':
+        neworder = Order()
+        neworder.user = request.user
+        neworder.fname = request.POST.get('fname')
+        neworder.lname = request.POST.get('lname')
+        neworder.email = request.POST.get('email')
+        neworder.phone = request.POST.get('phone')
+        neworder.address = request.POST.get('address')
+        neworder.city = request.POST.get('city')
+        neworder.state = request.POST.get('state')
+        neworder.country = request.POST.get('country')
+        neworder.pincode = request.POST.get('pincode')
+
+        neworder.payment_mode = request.POST.get('payment_mode')
+        neworder.payment_id = request.POST.get('payment_id')
+
+        cart = Cart.objects.filter(user=request.user)
+        cart_total_price = 0
+        for item in cart:
+            cart_total_price = cart_total_price + item.product.selling_price * item.product_qty
+        neworder.total_price = cart_total_price
+
+        trackno = 'epicdrop' + str(random.randint(1111111, 9999999))
+        while Order.objects.filter(tracking_no=trackno).exists():
+            trackno = 'epicdrop' + str(random.randint(1111111, 9999999))
+
+        neworder.tracking_no = trackno
+        neworder.save()
+
+        neworderitems = Cart.objects.filter(user=request.user)
+        for item in neworderitems:
+            OrderItem.objects.create(
+                order=neworder,
+                product=item.product,
+                price=item.product.selling_price,
+                quantity=item.product_qty
+            )
+
+            # Fix: Reduce product quantity and save
+            orderproduct = Product.objects.filter(id=item.product_id).first()
+            if orderproduct:
+                orderproduct.quantity = orderproduct.quantity - item.product_qty
+                orderproduct.save()
+
+        # Clear cart after order
+        Cart.objects.filter(user=request.user).delete()
+
+        # Fix: Ensure PayPal returns JSON response
+        payMode = request.POST.get('payment_mode')
+        if payMode == "Paid by Razorpay" or payMode == "Paid by Paypal":
+            return JsonResponse({'status': "Your Order has been placed Successfully"})
+
+        messages.success(request, "Your Order has been placed Successfully")
+
+    return redirect('/')
+
+
+
+@login_required(login_url='login_page')
+def razorpaycheck(request):
+    cart=Cart.objects.filter(user=request.user)
+    total_price=0
+    for item in cart:
+        total_price = total_price + item.product.selling_price * item.product_qty
+    
+    return JsonResponse({
+        'total_price':total_price
+    })
+
+
+def orders(request):
+    return HttpResponse("My Orders Page")

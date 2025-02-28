@@ -15,4 +15,9 @@ urlpatterns=[
     path('addtofav',views.add_to_fav, name='addtofav'),
     path('fav',views.favview_page, name='fav'),
     path('remove_fav/<str:fid>',views.remove_fav, name='remove_fav'),
+    path('checkout/',views.checkout_page,name='checkout'),
+    path('place-order',views.placeorder, name='placeorder'),
+
+    path('proceed-to-pay',views.razorpaycheck),
+    path('my-orders',views.orders),
 ]
