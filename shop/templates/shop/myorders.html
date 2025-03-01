@@ -1,0 +1,52 @@
+{% extends 'shop/layouts/main.html' %}
+
+{% block title %}
+    EpicDrop | MyOrders
+{% endblock title %}
+
+{% block content %}
+<section class="bg-light py-4 mt-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h4 class="mb-3"> MyOrders Page </h4>
+                <hr style="border-color: rgb(89,90,90);">
+            </div>
+        </div>
+    </div>
+</section>
+<div class="container my-3">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Order Date</th>
+                                <th>Tracking Number</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in orders %}
+                            <tr>
+                                <td>{{ item.created_at }}</td>
+                                <td>{{ item.tracking_no }}</td>
+                                <td>{{ item.total_price }}</td>
+                                <td>{{ item.status }}</td>
+                                <td>
+                                    <a href="{% url 'orderview' item.tracking_no %}" class="btn btn-primary"> View </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
