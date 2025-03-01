@@ -223,5 +223,14 @@ def razorpaycheck(request):
     })
 
 
-def orders(request):
-    return HttpResponse("My Orders Page")
+def orders_page(request):
+    orders = Order.objects.filter(user = request.user)
+    context = {'orders' : orders}
+    return render(request, 'shop/myorders.html', context)
+
+
+def order_view(request,t_no):
+    order = Order.objects.filter(tracking_no=t_no).filter(user=request.user).first()
+    orderitem = OrderItem.objects.filter(order=order)
+    context = {'orders':order, 'orderitem' : orderitem}
+    return render(request, 'shop/orderview.html', context)

@@ -19,5 +19,6 @@ urlpatterns=[
     path('place-order',views.placeorder, name='placeorder'),
 
     path('proceed-to-pay',views.razorpaycheck),
-    path('my-orders',views.orders),
+    path('my-orders',views.orders_page, name= "myorders"),
+    path('view-order/<str:t_no>',views.order_view, name= "orderview"),
 ]
