@@ -33,6 +33,8 @@ class Product(models.Model):
     trending=models.BooleanField(default=False,help_text=("0-show,1-Trending"))
     created_at=models.DateTimeField(auto_now_add=True)
 
+    
+
     def __str__(self):
         return self.name
     
